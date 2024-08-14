@@ -1,0 +1,103 @@
+hostname #
+
+--config consol password--
+line consol 0
+password
+login
+exit
+
+--config cisco as privileged EXEC mode encryped password to all routers--
+enable secret cisco
+
+--config domain name--
+ip domain-name ##.com
+
+--config ssh with secure password--
+username root secret cisco
+cryto key generate rsa
+1024
+
+--config all vty lines of ssh access and use local user profile--
+line vty 0 15
+transport input ssh
+login local
+
+--set the EXEC mode timeout 6minutes on the vty lines--
+exec-timeout 6
+exit
+
+--encrypt all the plain text password on all router--
+service password-encryption
+
+--config banner nessage--
+banner motd #qqqqqq#
+
+--disable dns lookup --
+no ip domain-lookup
+
+-- create vlan--
+vlan#
+name##
+
+--assign port to vlan--
+int range F0/1-8
+switchport mode access
+switchport access vlan#
+
+--config ip  address (router on a state inner vlan)--
+int G0/0/040
+incapsulation dot1Q 10
+ip address #.#.#.# subnet mask
+no shut
+
+--config staic trunk suitable interface--
+int range g0/1
+switchport mode trunk
+
+--cofig native vlan for trunk --
+switchort trunk native vlan99
+
+--config DHCPv4 server--
+ip dhcp excluded-address 192.168.1.1 192.16.1.10
+
+--create DHCP pool--
+ip dhcp pool NET-10
+network #.#.#.# sunet mask
+default-router 192.168.1.1
+dns-server 192.16.100.2
+
+--dispaly all config--
+show runnig config
+
+--save all config--
+copy running-config startup-config
+
+---ospf---
+router ospf 1
+router-id #.#.#.#
+network 10.1.20.0 0.0.0.255 area 0
+passive-interface g0/0/0
+
+exit
+
+show ip ospf interface
+
+--ACL--
+#ip access-list standard name
+#deny 10.0.0.0 0.255.255.255
+#permit ip any any
+#exit
+#int g0/0
+#ip access-group BlockStudents out
+#exit
+
+#ip access-list extended Name
+#deny tcp host source address host destination address eq 80
+#permit ip any any
+#exit
+#int g0/0
+#ip access-group BlockStudents out
+#exit
+
+
+
