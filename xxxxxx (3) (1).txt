@@ -98,6 +98,22 @@ show ip ospf interface
 #int g0/0
 #ip access-group BlockStudents out
 #exit
+--4 ethernet sw1 to sw2--
+--sw1--
+int range fa0/1-4
+channel-group #
+channel-group # mode #
+channel-group # mode active
+exit
+int port-channel 1
+switchport mode access
+--sw2--
+int range fa0/1-4
+channel-group 1 mode passive
+exit
+int port-channel 1
+switchport mode access
+
 
 
 
