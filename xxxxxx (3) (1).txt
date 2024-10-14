@@ -45,7 +45,7 @@ switchport mode access
 switchport access vlan#
 
 --config ip  address (router on a state inner vlan)--R
-int G0/0/040
+int f0/0.1
 incapsulation dot1Q 10
 ip address #.#.#.# subnet mask
 no shut
