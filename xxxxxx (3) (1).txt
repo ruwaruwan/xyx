@@ -35,22 +35,22 @@ banner motd #qqqqqq#
 --disable dns lookup --
 no ip domain-lookup
 
--- create vlan--
+-- create vlan--S
 vlan#
 name##
 
---assign port to vlan--
+--assign port to vlan--S
 int range F0/1-8
 switchport mode access
 switchport access vlan#
 
---config ip  address (router on a state inner vlan)--
+--config ip  address (router on a state inner vlan)--R
 int G0/0/040
 incapsulation dot1Q 10
 ip address #.#.#.# subnet mask
 no shut
 
---config staic trunk suitable interface--
+--config staic trunk suitable interface--S
 int range g0/1
 switchport mode trunk
 
@@ -60,7 +60,7 @@ switchort trunk native vlan99
 --config DHCPv4 server--
 ip dhcp excluded-address 192.168.1.1 192.16.1.10
 
---create DHCP pool--
+--create DHCP pool--R
 ip dhcp pool NET-10
 network #.#.#.# sunet mask
 default-router 192.168.1.1
@@ -72,7 +72,12 @@ show runnig config
 --save all config--
 copy running-config startup-config
 
----ospf---
+--loopback--R
+# interface loopback 0
+# ip address <ip_address> <subnet_mask>
+# exit
+
+---ospf---R
 router ospf 1
 router-id #.#.#.#
 network 10.1.20.0 0.0.0.255 area 0
@@ -82,37 +87,62 @@ exit
 
 show ip ospf interface
 
---ACL--
-#ip access-list standard name
+--ACL--R
+(destination near router and interface)
+#ip access-list standard (name)
 #deny 10.0.0.0 0.255.255.255
-#permit ip any any
+#permit any 
 #exit
 #int g0/0
-#ip access-group BlockStudents out
+#ip access-group (name) out
 #exit
 
-#ip access-list extended Name
-#deny tcp host source address host destination address eq 80
+(source near router and interface)
+#ip access-list extended (number eg-100)
+#deny ip (host source address) host (destination address) -normal use
+#deny tcp (host source address) host (destination address) eq 80 -using servises and change eq num different servises
 #permit ip any any
 #exit
 #int g0/0
-#ip access-group BlockStudents out
+#ip access-group (number) in
 #exit
---4 ethernet sw1 to sw2--
---sw1--
-int range fa0/1-4
-channel-group #
-channel-group # mode #
-channel-group # mode active
-exit
-int port-channel 1
-switchport mode access
---sw2--
-int range fa0/1-4
-channel-group 1 mode passive
-exit
-int port-channel 1
-switchport mode access
+
+~Print the Access lists
+#do sh access-list
+
+~show ospf database
+#sh ip ospf database
+
+--static NAT--R
+#int g0/1(connect static nat derectly innterface)
+#ip nat inside
+#exit
+#int g0/0 (connect internet inteface)
+#ip nat outside
+#exit
+(pc ganata hariyanna hadaganna)
+#ip nat inside source static (privet ip 1 useble)(public ip 1 useble)
+#ip nat inside source static (privet ip 2 useble)(public ip 2 useble)
+
+-- show nat translation--R
+#do sh ip nat translation
+
+--dynamic NAT--R
+#int g0/1(connect static nat derectly innterface)
+#ip nat inside
+#exit
+#int g0/0 (connect internet inteface)
+#ip nat outside
+#exit
+
+--create Acl--R
+#access-list 1 permit 172.16.2.0 0.0.0.255
+--create nat pool--R
+#ip nat pool (pool name) 200.0.0.1 200.0.0.10 netmask 255.255.255.0
+#ip inside source list 1 pool (pool name)
+
+--clear net translation--
+#do clear ip nat translation
 
 
 
