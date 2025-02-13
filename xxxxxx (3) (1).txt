@@ -144,6 +144,56 @@ show ip ospf interface
 --clear net translation--
 #do clear ip nat translation
 
+--view--
+aaa new-model
+enable view
+password cisco
+conf t
+parser view new1
+secret class1
+command exec show ip interface brief
+exit
+enable view new1
+
+
+--tacas--
+
+enable secret cisco
+aaa new-model
+tacacs-server host <server ip>
+tacacs-server key class1
+tacacs-server host 192.168.2.1 single-connection
+aaa authentication login default group tacacs+ local-case enable
+
+ip domain-name ##.com
+cryto key generate rsa
+1024
+line vty 0 15
+transport input ssh
+login authentication default
+
+
+.... High-level port security
+
+int f0/1
+switchport mode access
+switchport access vlan 50
+switchport port-security 
+switchport port-security maximum 1
+switchport port-security mac-address sticky 
+switchport port-security violation shutdown
+exit
+
+.... Secure remote management
+
+enable secret cisco
+ip domain-name cisco.com
+crypto key generate rsa
+1024
+username admin1  privilege 15 secret class1
+line vty 0 15
+login local
+exit 
 
 
 
