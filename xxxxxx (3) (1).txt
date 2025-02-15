@@ -1,199 +1,247 @@
-hostname #
+import 'package:flutter/material.dart';
+//import 'package:firebase_core/firebase_core.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 
---config consol password--
-line consol 0
-password
-login
-exit
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+ // await Firebase.initializeApp();
+  runApp(MaterialApp(
+    home: AppHome(),
+  ));
+}
 
---config cisco as privileged EXEC mode encryped password to all routers--
-enable secret cisco
+class AppHome extends StatefulWidget {
+  const AppHome({Key? key}) : super(key: key);
 
---config domain name--
-ip domain-name ##.com
+  @override
+  State<AppHome> createState() => _AppHomeState();
+}
 
---config ssh with secure password--
-username root secret cisco
-cryto key generate rsa
-1024
+class _AppHomeState extends State<AppHome> {
+  TextEditingController cityController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
 
---config all vty lines of ssh access and use local user profile--
-line vty 0 15
-transport input ssh
-login local
+  void sendFirebaseData() async {
+    if (cityController.text.isNotEmpty &&
+        ageController.text.isNotEmpty &&
+        nameController.text.isNotEmpty) {
+      Map<String, String> userDatabase = {
+        'City': cityController.text,
+        'Age': ageController.text,
+        'Name': nameController.text,
+      };
 
---set the EXEC mode timeout 6minutes on the vty lines--
-exec-timeout 6
-exit
+      //try {
+        //await FirebaseFirestore.instance.collection("users").add(userDatabase);
+        //ScaffoldMessenger.of(context).showSnackBar(
+          //SnackBar(content: Text("Data added successfully!")),
+        //);
+      //} catch (e) {
+        //ScaffoldMessenger.of(context).showSnackBar(
+          //SnackBar(content: Text("Error: $e")),
+        //);
+      //}
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill all fields")),
+      );
+    }
+  }
 
---encrypt all the plain text password on all router--
-service password-encryption
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Signup Form"),
+        centerTitle: true,
+        backgroundColor: Colors.red,
+      ),
+      body: Container(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: cityController,
+              decoration: InputDecoration(labelText: "City"),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: ageController,
+              decoration: InputDecoration(labelText: "Age"),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: "Name"),
+            ),
+            SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: sendFirebaseData,
+              child: Text("Submit"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
---config banner nessage--
-banner motd #qqqqqq#
+--innergradle
 
---disable dns lookup --
-no ip domain-lookup
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services'
+}
 
--- create vlan--S
-vlan#
-name##
+android {
+    namespace = "com.example.app3"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+	{
 
---assign port to vlan--S
-int range F0/1-8
-switchport mode access
-switchport access vlan#
+--outergradle
 
---config ip  address (router on a state inner vlan)--R
-int f0/0.1
-incapsulation dot1Q 10
-ip address #.#.#.# subnet mask
-no shut
+buildscript {
+    repositories {
+        google()
+        mevenCentral()
+        }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.4.2'
+                 }
+    }
 
---config staic trunk suitable interface--S
-int range g0/1
-switchport mode trunk
+--cal
 
---cofig native vlan for trunk --
-switchort trunk native vlan99
+import 'package:flutter/material.dart';
 
---config DHCPv4 server--
-ip dhcp excluded-address 192.168.1.1 192.16.1.10
+void main() {
+  runApp(MaterialApp(
+    home:HomeApp() ,
+  ));
+}
+class HomeApp extends StatefulWidget {
+  const HomeApp({super.key});
 
---create DHCP pool--R
-ip dhcp pool NET-10
-network #.#.#.# sunet mask
-default-router 192.168.1.1
-dns-server 192.16.100.2
+  @override
+  State<HomeApp> createState() => _HomeAppState();
+}
 
---dispaly all config--
-show runnig config
+class _HomeAppState extends State<HomeApp> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("App1"),
+        backgroundColor: Colors.blue,
+      ),
+      body:AppBody() ,
+    );
+  }
+}
+class AppBody extends StatefulWidget {
+  const AppBody({super.key});
 
---save all config--
-copy running-config startup-config
+  @override
+  State<AppBody> createState() => _AppBodyState();
+}
 
---loopback--R
-# interface loopback 0
-# ip address <ip_address> <subnet_mask>
-# exit
+class _AppBodyState extends State<AppBody> {
 
----ospf---R
-router ospf 1
-router-id #.#.#.#
-network 10.1.20.0 0.0.0.255 area 0
-passive-interface g0/0/0
+  TextEditingController Num1Controller = TextEditingController();
+  TextEditingController Num2Controller = TextEditingController();
 
-exit
-
-show ip ospf interface
-
---ACL--R
-(destination near router and interface)
-#ip access-list standard (name)
-#deny 10.0.0.0 0.255.255.255
-#permit any 
-#exit
-#int g0/0
-#ip access-group (name) out
-#exit
-
-(source near router and interface)
-#ip access-list extended (number eg-100)
-#deny ip (host source address) host (destination address) -normal use
-#deny tcp (host source address) host (destination address) eq 80 -using servises and change eq num different servises
-#permit ip any any
-#exit
-#int g0/0
-#ip access-group (number) in
-#exit
-
-~Print the Access lists
-#do sh access-list
-
-~show ospf database
-#sh ip ospf database
-
---static NAT--R
-#int g0/1(connect static nat derectly innterface)
-#ip nat inside
-#exit
-#int g0/0 (connect internet inteface)
-#ip nat outside
-#exit
-(pc ganata hariyanna hadaganna)
-#ip nat inside source static (privet ip 1 useble)(public ip 1 useble)
-#ip nat inside source static (privet ip 2 useble)(public ip 2 useble)
-
--- show nat translation--R
-#do sh ip nat translation
-
---dynamic NAT--R
-#int g0/1(connect static nat derectly innterface)
-#ip nat inside
-#exit
-#int g0/0 (connect internet inteface)
-#ip nat outside
-#exit
-
---create Acl--R
-#access-list 1 permit 172.16.2.0 0.0.0.255
---create nat pool--R
-#ip nat pool (pool name) 200.0.0.1 200.0.0.10 netmask 255.255.255.0
-#ip inside source list 1 pool (pool name)
-
---clear net translation--
-#do clear ip nat translation
-
---view--
-aaa new-model
-enable view
-password cisco
-conf t
-parser view new1
-secret class1
-command exec show ip interface brief
-exit
-enable view new1
-
-
---tacas--
-
-enable secret cisco
-aaa new-model
-tacacs-server host <server ip>
-tacacs-server key class1
-tacacs-server host 192.168.2.1 single-connection
-aaa authentication login default group tacacs+ local-case enable
-
-ip domain-name ##.com
-cryto key generate rsa
-1024
-line vty 0 15
-transport input ssh
-login authentication default
+  int total = 0;
 
 
-.... High-level port security
+  void cal(){
 
-int f0/1
-switchport mode access
-switchport access vlan 50
-switchport port-security 
-switchport port-security maximum 1
-switchport port-security mac-address sticky 
-switchport port-security violation shutdown
-exit
+    int number1 = int.tryParse(Num1Controller.text) ?? 0;
+    int number2 = int.tryParse(Num2Controller.text) ?? 0;
 
-.... Secure remote management
+    setState(() {
+      total = number1+number2;
+    });
+  }
 
-enable secret cisco
-ip domain-name cisco.com
-crypto key generate rsa
-1024
-username admin1  privilege 15 secret class1
-line vty 0 15
-login local
-exit 
+  void cal1(){
+    int number1 = int.tryParse(Num1Controller.text) ?? 0;
+    int number2 = int.tryParse(Num2Controller.text) ?? 0;
+
+    setState(() {
+      total = number1-number2;
+    });
+}
 
 
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            //child: Expanded(child: Image(image: AssetImage("assets/1.png"))),
+           height: 100,
+           padding: EdgeInsets.all(20),
+           color: Colors.red,
+           child: Row(
+             children: [
+               Text("Answer :"),
+               Text("$total"),
+             ],
+           ),
+         ),
+          SizedBox(height: 30,),
+
+          Container(
+            height: 200,
+            padding: EdgeInsets.all(20),
+            color: Colors.red,
+           child: Column(
+             children: [
+               Row(
+                 children: [
+                   Text("input 1 :",style: TextStyle(fontSize: 30,color: Colors.blue),
+                    ),
+                   Expanded(
+                     child: TextField(
+                     controller: Num1Controller,
+                     ),
+                   ),
+                 ],
+               ),
+               SizedBox(height: 10,),
+               Row(
+                 children: [
+                   Text("input 2 :"),
+                   Expanded(
+                       child: TextField(
+                       controller: Num2Controller,
+                       ),
+                   ),
+                 ],
+               ),
+
+             ],
+           ),
+
+          ),
+          SizedBox(height: 10,),
+          FilledButton(onPressed: cal, child: Text("+")),
+
+          SizedBox(height: 10,),
+          FilledButton(onPressed: cal1, child: Text("-")),
+        ],
+      ),
+    ) ;
+  }
+}
 
